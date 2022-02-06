@@ -31,9 +31,6 @@ provisioner:
       ssh_args: '-o ControlMaster=auto -o ControlPersist=1800s -o ConnectionAttempts=100 -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=publickey'
     diff:
       always: true
-  inventory:
-    links:
-      group_vars: ${CI_PROJECT_DIR}/group_vars/
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
   log: True

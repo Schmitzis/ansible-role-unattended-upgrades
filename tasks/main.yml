@@ -1,2 +1,45 @@
- - include: unattended-upgrades.yml
-   tags: unattended
+---
+- name: add distribution-specific variables
+  include_vars: "{{ ansible_distribution }}.yml"
+
+- name: add Debian Wheezy workaround
+  include_vars: "{{ ansible_distribution }}-{{ ansible_distribution_release }}.yml"
+  when: (ansible_distribution == "Debian") and (ansible_distribution_release == "wheezy")
+
+- name: add Debian Bullseye workaround
+  include_vars: "{{ ansible_distribution }}-{{ ansible_distribution_release }}.yml"
+  when: (ansible_distribution == "Debian") and (ansible_distribution_release == "bullseye")
+
+- name: add Ubuntu >=18.04 workaround
+  include_vars: "Ubuntu-18.04.yml"
+  when: ansible_distribution == 'Ubuntu' and
+    ansible_distribution_major_version|int >= 18
+
+- name: install unattended-upgrades
+  ansible.builtin.apt:
+    pkg: unattended-upgrades
+    state: present
+    cache_valid_time: "{{ unattended_cache_valid_time }}"
+    update_cache: yes
+  tags:
+    - unattended
+
+- name: create APT auto-upgrades configuration
+  ansible.builtin.template:
+    src: auto-upgrades.j2
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - unattended
+
+- name: create unattended-upgrades configuration
+  ansible.builtin.template:
+    src: unattended-upgrades.j2
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    owner: root
+    group: root
+    mode: 0644
+  tags:
+    - unattended

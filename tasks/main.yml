@@ -41,5 +41,15 @@
     owner: root
     group: root
     mode: 0644
+    validate: unattended-upgrade -d %s
   tags:
     - unattended
+
+- name: enable apt-daily serivces
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - apt-daily-upgrade.timer
+    - apt-daily.timer
